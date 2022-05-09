@@ -2,9 +2,9 @@ function [BETA_b, lpdf] = PG_PLDS_samp(BETA_a, BETA_b,...
     Y,X,A,b,Sig,m0,V0,d,Rmin,active)
 
 % to debug
-% BETA_a = BETA_new;
+% BETA_a = BETA_samp(:,:,g-1);
 % BETA_b = BETA_samp(:,:,g-1);
-% active = false;
+% active = true;
 
 p = size(BETA_a,1);
 T = size(BETA_a,2);
@@ -68,6 +68,7 @@ for t = (T-1):-1:1
     Jt = V_tmp(:,:,t)*A'/(A'*V_tmp(:,:,t)*A' + Sig);
     mstar_tmp = m_tmp(:,t) + Jt*(BETA_b(:,t+1) - A*m_tmp(:,t) - b);
     Vstar_tmp = (eye(p) - Jt*A)*V_tmp(:,:,t);
+    Vstar_tmp = (Vstar_tmp + Vstar_tmp')/2;
     if active
         BETA_b(:,t) = mvnrnd(mstar_tmp,Vstar_tmp)';
     end

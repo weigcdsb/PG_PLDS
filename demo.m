@@ -1,13 +1,13 @@
 %% generate data
 rng(1);
 N = 5;
-T = 100;
+T = 1000;
 p = 2;
 
-X = 2*randn(N, p);
+X = randn(N, p);
 BETA = zeros(p,T);
 for k = 1:p
-    BETA(k,:) = interp1(linspace(0,1,10),randn(10,1)*0.2,linspace(0,1,T),'spline');
+    BETA(k,:) = interp1(linspace(0,1,10),randn(10,1)*0.4,linspace(0,1,T),'spline');
 end
 
 LAM = exp(X*BETA);
@@ -28,26 +28,24 @@ m0 = zeros(p,1);
 V0 = eye(p);
 A = eye(p);
 b = zeros(p,1);
-Sig = eye(p)*1e-2;
+Sig = eye(p)*1e-3;
+
+addpath(genpath('C:\Users\gaw19004\Documents\GitHub\MFM_DPFA'));
+BETA_SMOO = ppasmoo_poissexp_na(Y,X,...
+    zeros(N,1),...
+    m0,V0,A,b,Sig);
 
 % tuning parameter
-d = 10;
-Rmin = .5;
+d = 50;
+Rmin = .01;
 
-ng = 1000;
+ng = 100;
 BETA_samp = zeros(p,T,ng);
 for k = 1:p
     BETA_samp(k,:,1) =...
         interp1(linspace(0,1,10),randn(10,1)*0.2,linspace(0,1,T),'spline');
 end
 
-figure(2)
-subplot(1,2,1)
-plot(BETA')
-title('true')
-subplot(1,2,2)
-plot(BETA_samp(:,:,1)')
-title('sample')
 
 for g = 2:ng
     
@@ -78,14 +76,18 @@ for g = 2:ng
     end
     
     figure(2)
-    subplot(1,2,1)
+    subplot(3,1,1)
     plot(BETA')
     title('true')
-    subplot(1,2,2)
+    subplot(3,1,2)
+    plot(BETA_SMOO')
+    title('RTS-smooth')
+    subplot(3,1,3)
     plot(mean(BETA_samp(:,:,round(g/2):g), 3)')
-    title("average: "+ round(g/2)+ " to " +g)
-    
+    title("MCMC-PG average: "+ "iter"+ round(g/2)+ " to " +"iter"+g)
 end
+
+
 
 
 
